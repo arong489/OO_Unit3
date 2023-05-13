@@ -46,7 +46,8 @@ public class MyNetwork implements Network {
     private final HashMap<Integer, Message> messages = new HashMap<>();
     private final HashMap<Integer, Integer> emojis = new HashMap<>();
 
-    public MyNetwork() {}
+    public MyNetwork() {
+    }
 
     @Override
     public void addPerson(Person person) throws EqualPersonIdException {
@@ -187,7 +188,7 @@ public class MyNetwork implements Network {
         }
         if (message instanceof EmojiMessage &&
                 !emojis.containsKey(((MyEmojiMessage) message).getEmojiId())) {
-            throw new MyEmojiIdNotFoundException(message.getId());
+            throw new MyEmojiIdNotFoundException(((MyEmojiMessage) message).getEmojiId());
         }
         if (message.getPerson1() == message.getPerson2()) {
             throw new MyEqualPersonIdException(message.getPerson1().getId());
@@ -414,7 +415,7 @@ public class MyNetwork implements Network {
         while (messageIterator.hasNext()) {
             message = messageIterator.next().getValue();
             if (message instanceof EmojiMessage) {
-                emojiId = ((EmojiMessage)message).getEmojiId();
+                emojiId = ((EmojiMessage) message).getEmojiId();
                 if (!emojis.containsKey(emojiId)) {
                     messageIterator.remove();
                 }
