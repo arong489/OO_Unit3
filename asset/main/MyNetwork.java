@@ -436,7 +436,7 @@ public class MyNetwork implements Network {
         if (person == null) {
             throw new MyPersonIdNotFoundException(id);
         }
-        int ans = Algorithm.mininumCircle(people.values(), person);
+        int ans = Algorithm.mininumCircle(people, person);
         if (ans == 0x7fffffff) {
             throw new MyPathNotFoundException(id);
         }
