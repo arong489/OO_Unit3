@@ -288,12 +288,12 @@ public class MyNetwork implements Network {
             coupleIds.put(id, ((MyPerson) person).getCoupleId());
         });
         int id;
-        int coupleId;
+        Integer coupleId;
         int ans = 0;
         for (Entry<Integer, Integer> relation : coupleIds.entrySet()) {
             id = relation.getKey();
             coupleId = relation.getValue();
-            if (coupleId > id && coupleId != 0) {
+            if (coupleId != null && coupleId.compareTo(id) > 0) {
                 if (coupleIds.get(coupleId) == id) {
                     ans++;
                 }

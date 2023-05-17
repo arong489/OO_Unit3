@@ -207,8 +207,8 @@ public class MyPerson implements Person {
         return this.singleacquaintance;
     }
 
-    public int getCoupleId() {
-        int coupleId = 0;
+    public Integer getCoupleId() {
+        Integer coupleId = null;
         int value = 0;
         int tempId;
         int tempValue;
