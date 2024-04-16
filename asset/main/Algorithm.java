@@ -1,7 +1,7 @@
 package asset.main;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Stack;
 import java.util.Map.Entry;
 
 import com.oocourse.spec3.main.Person;
@@ -12,38 +12,25 @@ public class Algorithm {
         HashMap<Person, int[]> arrive = new HashMap<>();
         // <rest, [dis, potential from]>
         HashMap<Person, int[]> rest = new HashMap<>();
-        ArrayList<MyPerson> helperPersons = new ArrayList<>();
+        HashMap<Person, Person> path = new HashMap<>();
         // initial
-        initialMap(people, arrive, rest, helperPersons, src);
-        int ans = modifyDijkstra(arrive, rest);
-        fixMap(helperPersons, src);
-        return ans;
+        initialMap(people, arrive, rest, path, src);
+        return modifyDijkstra(arrive, rest, path);
     }
 
     private static void initialMap(
-            HashMap<Integer, Person> people,
-            HashMap<Person, int[]> arrive,
-            HashMap<Person, int[]> rest,
-            ArrayList<MyPerson> helperPersons,
+            HashMap<Integer, Person> people, HashMap<Person, int[]> arrive,
+            HashMap<Person, int[]> rest, HashMap<Person, Person> path,
             Person src) {
-        int id = 0x80000000;
-        MyPerson tempPerson;
-
+        int id = 1;
+        arrive.put(src, new int[] { 0, 0x80000000 });
         for (Person person : people.values()) {
             if (person == src) {
                 continue;
             }
             if (src.isLinked(person)) {
-                while (people.containsKey(id)) {
-                    id++;
-                }
                 rest.put(person, new int[] { src.queryValue(person), id });
-                tempPerson = new MyPerson(id, null, 0);
-                tempPerson.addLink(person, src.queryValue(person));
-                ((MyPerson) person).addLink(tempPerson, src.queryValue(person));
-                ((MyPerson) person).modifyRelation(src, -src.queryValue(person));
-                arrive.put(tempPerson, new int[] { 0, id });
-                helperPersons.add(tempPerson);
+                path.put(person, src);
                 id++;
             } else {
                 rest.put(person, new int[] { 0x7fffffff, 0 });
@@ -51,9 +38,8 @@ public class Algorithm {
         }
     }
 
-    private static int modifyDijkstra(
-            HashMap<Person, int[]> arrive,
-            HashMap<Person, int[]> rest) {
+    private static int modifyDijkstra(HashMap<Person, int[]> arrive,
+            HashMap<Person, int[]> rest, HashMap<Person, Person> path) {
         MyPerson ans = null;
         int[] initialArray = new int[] { 0x7fffffff, 0 };
         int[] tempArray;
@@ -61,6 +47,8 @@ public class Algorithm {
         int myAns = 0x7fffffff;
         int tempAns;
         Person tempPerson;
+        Person ansPerson1 = null;
+        Person ansPerson2 = null;
         while (true) {
             minArray = initialArray;
             ans = null;
@@ -78,34 +66,55 @@ public class Algorithm {
             rest.remove(ans);
             for (Entry<Person, Integer> entry : ans.getAcquaintance().entrySet()) {
                 tempPerson = entry.getKey();
+                if (tempPerson.getId() == path.get(ans).getId()) {
+                    continue;
+                }
                 tempArray = rest.get(tempPerson);
                 if (tempArray == null) {
                     tempArray = arrive.get(tempPerson);
                     tempAns = tempArray[0] + minArray[0] + entry.getValue();
                     if (tempArray[1] != minArray[1] && tempAns < myAns) {
                         myAns = tempAns;
+                        ansPerson1 = ans;
+                        ansPerson2 = tempPerson;
                     }
                 } else {
                     tempAns = minArray[0] + entry.getValue();
                     if (tempArray[0] > tempAns) {
                         tempArray[0] = tempAns;
                         tempArray[1] = minArray[1];
+                        path.put(tempPerson, ans);
                     }
                 }
             }
         }
+        if (myAns != 0x7fffffff && ansPerson1 != null && ansPerson2 != null) {
+            printPath(path, ansPerson1, ansPerson2);
+        }
         return myAns;
     }
 
-    private static void fixMap(
-            ArrayList<MyPerson> helperPersons,
-            Person src) {
-        Entry<Person, Integer> entry;
-        for (MyPerson myPerson : helperPersons) {
-            entry = myPerson.getAcquaintance().entrySet().iterator().next();
-            ((MyPerson) entry.getKey()).modifyRelation(myPerson, -entry.getValue());
-            ((MyPerson) entry.getKey()).addLink(src, entry.getValue());
+    private static void printPath(
+            HashMap<Person, Person> path,
+            Person ansPerson1,
+            Person ansPerson2) {
+        Stack<Person> tempPath = new Stack<>();
+        Person tempPerson = ansPerson1;
+        System.out.print("Path :\t");
+        while (tempPerson != null) {
+            tempPath.push(tempPerson);
+            tempPerson = path.get(tempPerson);
         }
+        while (!tempPath.empty()) {
+            System.out.print(tempPath.pop().getId() + " -> ");
+        }
+        System.out.print(ansPerson2.getId());
+        tempPerson = path.get(ansPerson2);
+        while (tempPerson != null) {
+            System.out.print(" -> " + tempPerson.getId());
+            tempPerson = path.get(tempPerson);
+        }
+        System.out.println("");
     }
 }
 // ap -1 a 1
